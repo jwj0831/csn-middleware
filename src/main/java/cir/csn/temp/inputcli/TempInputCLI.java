@@ -1,6 +1,7 @@
 package cir.csn.temp.inputcli;
 
 import java.sql.SQLException;
+import java.util.Map;
 import java.util.Scanner;
 
 import cir.csn.server.snm.db.DAOFactory;
@@ -8,12 +9,12 @@ import cir.csn.server.snm.db.DAOFactory;
 public class TempInputCLI {
 	private static SensorMetaDAO dao;
 	private static Scanner sc;
-	
-	
+
+
 	public static void main(String[] args) {
 		sc = new Scanner(System.in);
 		dao = new DAOFactory().sensorMetaDAO();
-		
+
 		int commandType = 0;
 		boolean continue_flag = true;
 
@@ -31,7 +32,7 @@ public class TempInputCLI {
 			System.out.print("Choose Command: ");
 			commandType = sc.nextInt();
 			sc.nextLine();
-			
+
 			switch(commandType){
 			case 0:
 				continue_flag = false;
@@ -69,22 +70,81 @@ public class TempInputCLI {
 	}
 
 	private static void createSensorMeta() {
-		String sensor_ip = null;
-		String sensor_id = null;
-		String sensor_uri = null;
-		
+		String ip = null;
+		String id = null;
+		String uri = null;
+
 		System.out.println("Create Sensor Meta Mode");
 		System.out.print("Sensor IP: ");
-		sensor_ip = sc.nextLine();
-		System.out.println(sensor_ip);
+		ip = sc.nextLine();
+		System.out.println(ip);
 		System.out.print("Sensor ID: ");
-		sensor_id = sc.nextLine();
-		System.out.println(sensor_id);
-		sensor_uri = "http://" + sensor_ip + "/" + sensor_id;
-		System.out.println("Your URI: " + sensor_uri);
-		
+		id = sc.nextLine();
+		System.out.println(id);
+		uri = "http://" + ip + "/" + id;
+		System.out.println("Your URI: " + uri);
+
 		try {
-			dao.addSensor(sensor_uri, sensor_ip, sensor_id);
+			dao.addSensor(uri, ip, id);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		System.out.println("Finish DB Input");
+	}
+
+	private static void updateSensorMeta() {
+		String ip = null;
+		String id = null;
+		String uri = null;
+
+		System.out.println("Update Sensor Meta Mode");
+
+		Map<String, String> sensorMetaMap = null;
+
+		System.out.print("Input Sensor ID: ");
+		id = sc.nextLine();
+
+		try {
+			sensorMetaMap = dao.getSensorMeta(id);
+
+
+			ip = sensorMetaMap.get("ip");
+			System.out.println("Current Sensor IP: " + ip);
+
+			String old_id = id;
+
+			System.out.println("Input Updated Sensor Meta ");
+			System.out.print("Sensor IP: ");
+			ip = sc.nextLine();
+			System.out.println(ip);
+			System.out.print("Sensor ID: ");
+			id = sc.nextLine();
+			System.out.println(id);
+			uri = "http://" + ip + "/" + id;
+			System.out.println("Your New URI: " + uri);
+
+			dao.updateSensorMeta(uri, ip, id, old_id);
+			System.out.println("Finish DB Update");
+
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private static void deleteSensorMeta() {
+		String sensor_id = null;
+		System.out.println("Delete Sensor Meta Mode");
+
+		System.out.print("Input Sensor ID: ");
+		sensor_id = sc.nextLine();
+
+		try {
+			dao.deleteSensorMeta(sensor_id);
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -92,33 +152,103 @@ public class TempInputCLI {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		System.out.println("Finish DB Input");
-	}
 
-	private static void updateSensorMeta() {
-		System.out.println("Create Sensor Meta Mode");
-	}
-
-	private static void deleteSensorMeta() {
-		System.out.println("Update Sensor Meta Mode");
+		System.out.println("Finish Sensor Meta Delete");
 	}
 
 	private static void createSensorTag() {
+		String id = null;
+		String uri = null;
+		String tag = null;
+		Map<String, String> sensorMetaMap = null;
+
 		System.out.println("Create Sensor Tags Mode");
+		System.out.print("Sensor ID: ");
+		id = sc.nextLine();
+
+		try {
+			sensorMetaMap = dao.getSensorMeta(id);
+			uri = sensorMetaMap.get("uri");
+
+			System.out.print("Input Tag: ");
+			tag = sc.nextLine();
+
+			dao.addTagInfo(uri, tag);
+
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void updateSensorTag() {
+		String uri = null;
+		String id = null;
+		String tag = null;
+		String new_tag = null;
+		Map<String, String> sensorMetaMap = null;
+
 		System.out.println("Update Sensor Tags Mode");
+		System.out.print("Sensor ID: ");
+		id = sc.nextLine();
+
+		System.out.print("Tag: ");
+		tag = sc.nextLine();
+
+		System.out.print("New Tag: ");
+		new_tag = sc.nextLine();
+
+		try {
+			sensorMetaMap = dao.getSensorMeta(id);
+			uri = sensorMetaMap.get("uri");
+			
+			dao.updateTagInfo(uri, tag, new_tag);
+
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	private static void deleteSensorTag() {
+		String uri = null;
+		String id = null;
+		String tag = null;
+		Map<String, String> sensorMetaMap = null;
+
 		System.out.println("Delete Sensor Tags Mode");
+		System.out.print("Sensor ID: ");
+		id = sc.nextLine();
+
+		System.out.print("Tag: ");
+		tag = sc.nextLine();
+
+		try {
+			sensorMetaMap = dao.getSensorMeta(id);
+			uri = sensorMetaMap.get("uri");
+			
+			dao.deleteTagInfo(uri, tag);
+
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private static void createSensorNetwork() {
 		System.out.println("Create Sensor Network Mode");
 	}
-	
+
 	private static void deleteSensorNetwork() {
 		System.out.println("Delete Sensor Network Mode");
 	}

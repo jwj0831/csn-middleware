@@ -22,7 +22,7 @@ public class SimpleMQTTClient implements MqttCallback {
 	MqttClient myClient;
 	MqttConnectOptions connOpt;
 	static final String BROKER_URL = "tcp://localhost:1883";
-	static final String NODE_ID = "Node1";
+	static final String NODE_ID = "Node";
 	static final String CONN_USERNAME = "user2";
 	static final String CONN_PASSWORD_MD5 = "1234";
 

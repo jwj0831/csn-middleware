@@ -15,13 +15,12 @@ public class SensorDataDAO {
 	
 	public void add(SensorData sensorData) throws ClassNotFoundException, SQLException {
 		Connection c = connectionMaker.makeConnection();
-		
 		PreparedStatement ps = c.prepareStatement("INSERT INTO csn_snsr_data(snsr_uri, timestamp, val) VALUES(?, ?, ?)");
 		ps.setString(1, sensorData.getSnsr_id());
 		ps.setString(2, sensorData.getTimestamp());
 		ps.setString(3, sensorData.getValue());
 		ps.executeUpdate();
-
+		System.out.println("Test2");
 		ps.close();
 		c.close();
 	}
