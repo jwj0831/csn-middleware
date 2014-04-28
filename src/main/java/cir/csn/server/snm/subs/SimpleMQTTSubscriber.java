@@ -14,25 +14,24 @@ import org.json.simple.JSONObject;
 
 import cir.csn.server.snm.db.DAOFactory;
 import cir.csn.server.snm.db.SensorDataDAO;
-import cir.csn.temp.inputcli.SensorMetaDAO;
+import cir.csn.server.snm.metamangement.SensorMetaDAO;
 
 public class SimpleMQTTSubscriber implements MqttCallback  {
 	MqttClient myClient;
 	MqttConnectOptions connOpt;
-	
+
 	static Logger logger = Logger.getLogger(SimpleMQTTSubscriber.class);
-	
+
 	public SensorDataDAO sensorDao;
 	public SensorMetaDAO sensorMetaDao;
 	static final String BROKER_URL = "tcp://localhost:1883";
-	static final String NODE_ID = "Node2";
-	static final String CONN_USERNAME = "user";
-	static final String CONN_PASSWORD_MD5 = "1234";
-	
+	static final String CLIENT_ID = "Subs-Node";
+	static final String SUBS_TOPIC = "CSN/Middleware/RawData";
+
 	public void connectionLost(Throwable t) {
 		System.out.println("Connection lost!");
 	}
-	
+
 	public void deliveryComplete(IMqttDeliveryToken arg0) {
 	}
 
@@ -40,19 +39,19 @@ public class SimpleMQTTSubscriber implements MqttCallback  {
 		String data = arg1.toString();
 		SensorDataParser parser = new SensorDataParser(data);
 		JSONObject jsonObj = parser.getJsonObj();
-		
+
 		String id = jsonObj.get("snsr_id").toString();
 		String timestamp = jsonObj.get("timestamp").toString();
 		String val = jsonObj.get("snsr_val").toString();
-		
+
 		System.out.println("Sensor ID: " + id);
 		System.out.println("Timestamp: " + jsonObj.get("timestamp"));
 		System.out.println("Value: " + jsonObj.get("snsr_val"));
-		
+
 		Map<String, String> map = sensorMetaDao.getSensorMeta(id);
 		String uri = map.get("uri");
 		System.out.println("URI: " + uri);
-		
+
 		SensorData sensorData  = new SensorData(uri, timestamp, val);
 		sensorDao.add(sensorData);
 		System.out.println("DB Input Finish");
@@ -60,7 +59,7 @@ public class SimpleMQTTSubscriber implements MqttCallback  {
 
 	public static void main(String[] args) {
 		logger.setLevel(Level.ALL);
-		
+
 		SimpleMQTTSubscriber subscriber = new SimpleMQTTSubscriber();
 		subscriber.sensorDao = new DAOFactory().sensorDataDAO();
 		subscriber.sensorMetaDao = new DAOFactory().sensorMetaDAO();
@@ -69,13 +68,11 @@ public class SimpleMQTTSubscriber implements MqttCallback  {
 
 	public void subscribeSensorData() {
 		// setup MQTT Client
-		String clientID = NODE_ID;
+		String clientID = CLIENT_ID;
 		connOpt = new MqttConnectOptions();
 
 		connOpt.setCleanSession(true);
 		connOpt.setKeepAliveInterval(30);
-		connOpt.setUserName(CONN_USERNAME);
-		connOpt.setPassword(CONN_PASSWORD_MD5.toCharArray());
 
 		// Connect to Broker
 		try {
@@ -91,13 +88,13 @@ public class SimpleMQTTSubscriber implements MqttCallback  {
 
 		// Setup topic
 		// topics on m2m.io are in the form <domain>/<stuff>/<thing>
-		String myTopic = "Node";
+		String myTopic = SUBS_TOPIC;
 
 		// Subscribe to topic if subscriber
 		try {
 			int subQoS = 1;
 			myClient.subscribe(myTopic, subQoS);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		} 
@@ -105,11 +102,8 @@ public class SimpleMQTTSubscriber implements MqttCallback  {
 		// Disconnect
 		try {
 			// Wait to ensure subscribed messages are delivered
-			System.out.println("wait..");
-			for(int i=1;i<=60;i++){
-				Thread.sleep(1000);
-			}
-			
+			System.out.println("Press any key to stop Subscription...");
+			System.in.read();
 			myClient.disconnect();
 			System.out.println("Disconneted..\n\nEnd...");
 		} catch (Exception e) {

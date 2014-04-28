@@ -20,7 +20,6 @@ public class SensorDataDAO {
 		ps.setString(2, sensorData.getTimestamp());
 		ps.setString(3, sensorData.getValue());
 		ps.executeUpdate();
-		System.out.println("Test2");
 		ps.close();
 		c.close();
 	}

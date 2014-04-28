@@ -1,6 +1,6 @@
 package cir.csn.server.snm.db;
 
-import cir.csn.temp.inputcli.SensorMetaDAO;
+import cir.csn.server.snm.metamangement.SensorMetaDAO;
 
 public class DAOFactory {
 	public SensorDataDAO sensorDataDAO() {

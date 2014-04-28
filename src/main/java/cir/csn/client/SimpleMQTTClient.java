@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Random;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttDeliveryToken;
@@ -17,14 +18,12 @@ import org.eclipse.paho.client.mqttv3.MqttTopic;
 import org.json.simple.JSONObject;
 
 public class SimpleMQTTClient implements MqttCallback {
-	static Logger logger = Logger.getLogger(SimpleMQTTClient.class);
-	
 	MqttClient myClient;
 	MqttConnectOptions connOpt;
 	static final String BROKER_URL = "tcp://localhost:1883";
-	static final String NODE_ID = "Node";
-	static final String CONN_USERNAME = "user2";
-	static final String CONN_PASSWORD_MD5 = "1234";
+	static final String NODE_ID = "Node2";
+	static final String TOPIC_NAME = "CSN/Middleware/RawData";
+	static final int MSG_NUM = 100;
 
 	
 	public void connectionLost(Throwable t) {
@@ -41,8 +40,6 @@ public class SimpleMQTTClient implements MqttCallback {
 	}
 
 	public static void main(String[] args) {
-		logger.setLevel(Level.ALL);
-		
 		SimpleMQTTClient publisher = new SimpleMQTTClient();
 		publisher.publishSensorData();
 	}
@@ -53,8 +50,6 @@ public class SimpleMQTTClient implements MqttCallback {
 		connOpt = new MqttConnectOptions();
 		connOpt.setCleanSession(true);
 		connOpt.setKeepAliveInterval(30);
-		//connOpt.setUserName(CONN_USERNAME);
-		//connOpt.setPassword(CONN_PASSWORD_MD5.toCharArray());
 
 		// Connect to Broker
 		try {
@@ -69,18 +64,23 @@ public class SimpleMQTTClient implements MqttCallback {
 		System.out.println("Connected to " + BROKER_URL);
 
 		// Setup topic
-		String myTopic = NODE_ID;
+		String myTopic = TOPIC_NAME;
 		MqttTopic topic = myClient.getTopic(myTopic);
-
-		for (int i=1; i<=5; i++) {
+		int randNum = 0;
+		for (int i=1; i<=MSG_NUM; i++) {
 			Calendar calendar = Calendar.getInstance();
             java.util.Date date = calendar.getTime();
             String today = (new SimpleDateFormat("yyyyMMddHHmmss").format(date));
 			
+            Random oRandom = new Random();
+
+            // 1~10까지의 정수를 랜덤하게 출력
+            randNum = oRandom.nextInt(999) + 1;
+            
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("snsr_id", NODE_ID);
 			jsonObject.put("timestamp",today);
-			jsonObject.put("snsr_val", i);
+			jsonObject.put("snsr_val", randNum);
 			
 			String pubJsonMsg = jsonObject.toJSONString();
             
@@ -99,7 +99,7 @@ public class SimpleMQTTClient implements MqttCallback {
 				token = topic.publish(message);
 				// Wait until the message has been delivered to the broker
 				token.waitForCompletion();
-				Thread.sleep(100);
+				Thread.sleep(500);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

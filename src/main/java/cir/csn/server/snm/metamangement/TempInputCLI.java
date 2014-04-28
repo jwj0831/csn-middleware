@@ -1,8 +1,12 @@
-package cir.csn.temp.inputcli;
+package cir.csn.server.snm.metamangement;
 
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 
 import cir.csn.server.snm.db.DAOFactory;
 
@@ -28,7 +32,8 @@ public class TempInputCLI {
 			System.out.println("5. Update Sensor Tags");
 			System.out.println("6. Delete Sensor Tags");
 			System.out.println("7. Create Sensor Network");
-			System.out.println("8. Delete Sensor Network");
+			System.out.println("8. Update Sensor Network");
+			System.out.println("9. Delete Sensor Network");
 			System.out.print("Choose Command: ");
 			commandType = sc.nextInt();
 			sc.nextLine();
@@ -59,6 +64,9 @@ public class TempInputCLI {
 				createSensorNetwork();
 				break;
 			case 8:
+				updateSensorNetwork();
+				break;
+			case 9:
 				deleteSensorNetwork();
 				break;
 			default:
@@ -146,10 +154,8 @@ public class TempInputCLI {
 		try {
 			dao.deleteSensorMeta(sensor_id);
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -176,10 +182,8 @@ public class TempInputCLI {
 			dao.addTagInfo(uri, tag);
 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -208,10 +212,8 @@ public class TempInputCLI {
 			dao.updateTagInfo(uri, tag, new_tag);
 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -237,19 +239,94 @@ public class TempInputCLI {
 			dao.deleteTagInfo(uri, tag);
 
 		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
 	private static void createSensorNetwork() {
+		String name = null;
+		String create_date = null;
+		int sn_id = 0;
+		String temp_sensor = null;
+		Set<String> sensors = new HashSet<String>();
 		System.out.println("Create Sensor Network Mode");
+		System.out.print("Sensor Network Name: ");
+		name = sc.nextLine();
+		
+		Calendar calendar = Calendar.getInstance();
+        java.util.Date date = calendar.getTime();
+        create_date = (new SimpleDateFormat("yyyyMMddHHmmss").format(date));
+        
+        try {
+			dao.addSensorNetwork(name, create_date);
+			System.out.println("Finish Insert Sensor Network in DB");
+			System.out.println("Add Sensors");
+			
+			for(;;){
+				System.out.print("Input Sensor: ");
+				temp_sensor = sc.nextLine();
+				if( temp_sensor.compareTo("end") == 0 )
+					break;
+				else
+					sensors.add(temp_sensor);
+			}
+			
+			sn_id = dao.getSensorNetworkID(name);
+			dao.addSensorNetworkMembers(sn_id, sensors);
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+        
 	}
 
+	private static void updateSensorNetwork() {
+		String name = null;
+		String new_name = null;
+		
+		System.out.println("Update Sensor Network Mode");
+		System.out.print("Sensor Network Name: ");
+		name = sc.nextLine();
+		
+		System.out.print("Sensor Network New Name: ");
+		new_name = sc.nextLine();
+        
+        try {
+			dao.updateSensorNetwork(name, new_name);
+			
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+        System.out.println("Finish Update Sensor Network in DB");
+	}
+	
 	private static void deleteSensorNetwork() {
+		String name = null;
+		String delete_date = null;
 		System.out.println("Delete Sensor Network Mode");
+
+		System.out.print("Sensor Network Name: ");
+		name = sc.nextLine();
+		
+		Calendar calendar = Calendar.getInstance();
+        java.util.Date date = calendar.getTime();
+        delete_date = (new SimpleDateFormat("yyyyMMddHHmmss").format(date));
+        
+        try {
+			dao.deleteSensorNetwork(name, delete_date);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+        System.out.println("Finish Delet Sensor Network in DB");
+		
 	}
 }
