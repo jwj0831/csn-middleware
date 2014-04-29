@@ -22,6 +22,10 @@ public class SensorDataConnectionThread extends Thread {
 			createServerSocketandStream();
 			for(;;){
 				SensorData tempSensorData = (SensorData) objectInputStream.readObject();
+				
+				if(tempSensorData.getTimestamp().compareTo("END") == 0)
+					break;
+				
 				System.out.println("Sensor Data Received: " + tempSensorData.getSnsr_id());
 				sensorData = new SensorData(tempSensorData.getSnsr_id(), tempSensorData.getTimestamp(), tempSensorData.getValue());
 				sensorData.setSnsr_id(tempSensorData.getSnsr_id());
@@ -30,7 +34,7 @@ public class SensorDataConnectionThread extends Thread {
 				SensorNetworkDataPublisher.getSensorDataQueue().offer(sensorData);
 				System.out.println("Queue Size: " + SensorNetworkDataPublisher.getSensorDataQueue().size());
 			}
-			//closeServerSocketandStream();
+			closeServerSocketandStream();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {

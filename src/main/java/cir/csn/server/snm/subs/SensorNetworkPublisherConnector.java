@@ -49,7 +49,6 @@ public class SensorNetworkPublisherConnector {
 			objectOutputStream.writeObject(sensorData);
 			objectOutputStream.flush();
 			/*System.out.println("Finish Send Sensor data object");*/
-			//closeSocketandStream();
 		} catch (IOException e) {
 			System.out.println("Socket Open & Close Error!");
 			e.printStackTrace();

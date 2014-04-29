@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -181,6 +182,42 @@ public class SensorMetaDAO {
 		c.close();
 		
 		return sn_id;
+	}
+	
+	public Set<String> getSensorNetworksSet() throws ClassNotFoundException, SQLException {
+		Set<String> sensorNetworkSet = new HashSet<String>();
+		Connection c = connectionMaker.makeConnection();
+		
+		PreparedStatement ps = c.prepareStatement("SELECT sn_name FROM csn_sn_meta");
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			sensorNetworkSet.add(rs.getString("sn_name"));
+		}
+
+		rs.close();
+		ps.close();
+		c.close();
+		
+		return sensorNetworkSet;
+	}
+	
+	public Set<String> getSensrMembersSet(String sn_name) throws ClassNotFoundException, SQLException {
+		Set<String> sensorMembersSet = new HashSet<String>();
+		Connection c = connectionMaker.makeConnection();
+		int sn_id = this.getSensorNetworkID(sn_name);
+		
+		PreparedStatement ps = c.prepareStatement("SELECT sn_member FROM csn_sn_members WHERE sn_id = ?");
+		ps.setInt(1, sn_id);
+		ResultSet rs = ps.executeQuery();
+		while(rs.next()) {
+			sensorMembersSet.add(rs.getString("sn_member"));
+		}
+
+		rs.close();
+		ps.close();
+		c.close();
+		
+		return sensorMembersSet;
 	}
 	
 	public void addSensorNetworkMembers(int sn_id, Set<String> sensors) throws ClassNotFoundException, SQLException {

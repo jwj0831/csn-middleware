@@ -117,6 +117,8 @@ public class SimpleMQTTSubscriber implements MqttCallback  {
 			System.out.println("Press any key to stop Subscription...");
 			System.in.read();
 			myClient.disconnect();
+			snConnector.setSensorData(new SensorData(null, "END", null));	//Temporary Finish Message "END"
+			snConnector.transferSensorNetworkMeta();
 			snConnector.closeSocketandStream();
 			System.out.println("Disconneted..\n\nEnd...");
 		} catch (Exception e) {

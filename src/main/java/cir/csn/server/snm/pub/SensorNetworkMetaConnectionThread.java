@@ -22,10 +22,6 @@ public class SensorNetworkMetaConnectionThread extends Thread {
 
 	static final int PORT = 50001;
 
-	public SensorNetworkMetaConnectionThread() {
-
-	}
-
 	public void run() {
 		try {
 			createServerSocketandStream();
@@ -35,6 +31,9 @@ public class SensorNetworkMetaConnectionThread extends Thread {
 					networkListSet.remove(metadata.getSn_name());
 					networkListMap.remove(metadata.getSn_name());
 				}
+				else if(metadata.getSn_id() == 999){
+					break;	//Temporary Close Message sn_id == 999
+				}
 				else {
 					System.out.println("Metadata Receive: " + metadata.getSn_name());
 					networkListSet.add(metadata.getSn_name());
@@ -42,7 +41,7 @@ public class SensorNetworkMetaConnectionThread extends Thread {
 				}
 			}
 
-			//closeServerSocketandStream();
+			closeServerSocketandStream();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {

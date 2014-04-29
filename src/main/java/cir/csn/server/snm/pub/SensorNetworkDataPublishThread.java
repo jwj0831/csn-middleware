@@ -31,6 +31,8 @@ public class SensorNetworkDataPublishThread extends Thread {
 		connectionFactory = new ActiveMQConnectionFactory(connectionUri);
 		connection = connectionFactory.createConnection();
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		
+		
 	}
 
 	public void after() throws Exception {

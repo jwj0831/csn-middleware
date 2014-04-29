@@ -92,9 +92,11 @@ public class TempInputCLI {
 			}
 		}while(continue_flag);
 		try {
+			//Temporary Close Message sn_id == 999
+			snConnector.setSensorNetworkData(null, 999, null, false);
+			snConnector.transferSensorNetworkMeta();
 			snConnector.closeSocketandStream();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Bye");
