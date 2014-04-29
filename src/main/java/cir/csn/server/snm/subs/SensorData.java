@@ -1,6 +1,9 @@
 package cir.csn.server.snm.subs;
 
-public class SensorData {
+import java.io.Serializable;
+
+public class SensorData implements Serializable {
+	private static final long serialVersionUID = -7180355001007457312L;
 	private String snsr_id;
 	private String timestamp;
 	private String value;
@@ -17,7 +20,6 @@ public class SensorData {
 	public void setSnsr_id(String snsr_id) {
 		this.snsr_id = snsr_id;
 	}
-	
 	public String getTimestamp() {
 		return timestamp;
 	}
@@ -30,5 +32,4 @@ public class SensorData {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 }

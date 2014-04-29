@@ -1,8 +1,5 @@
 package cir.csn.client;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Random;
@@ -21,10 +18,9 @@ public class SimpleMQTTClient implements MqttCallback {
 	MqttClient myClient;
 	MqttConnectOptions connOpt;
 	static final String BROKER_URL = "tcp://localhost:1883";
-	static final String NODE_ID = "Node2";
+	static final String NODE_ID = "Node6";
 	static final String TOPIC_NAME = "CSN/Middleware/RawData";
-	static final int MSG_NUM = 100;
-
+	static final int MSG_NUM = 3;
 	
 	public void connectionLost(Throwable t) {
 		System.out.println("Connection lost!");

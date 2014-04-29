@@ -184,17 +184,12 @@ public class SensorMetaDAO {
 	}
 	
 	public void addSensorNetworkMembers(int sn_id, Set<String> sensors) throws ClassNotFoundException, SQLException {
-		String snsr_uri = null;
 		Connection c = connectionMaker.makeConnection();
-		
 		Iterator<String> iter = sensors.iterator();
 		PreparedStatement ps = c.prepareStatement("INSERT INTO csn_sn_members(sn_id, sn_member) VALUES(?, ?)");
 		
 		while(iter.hasNext()){
-			String id = iter.next();
-			
-			snsr_uri = this.getSensorURI(id);
-			
+			String snsr_uri= iter.next();
 			ps.setInt(1, sn_id);
 			ps.setString(2, snsr_uri);
 			ps.executeUpdate();

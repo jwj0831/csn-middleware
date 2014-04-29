@@ -1,5 +1,6 @@
 package cir.csn.server.snm.metamangement;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -11,16 +12,32 @@ import java.util.Set;
 import cir.csn.server.snm.db.DAOFactory;
 
 public class TempInputCLI {
-	private static SensorMetaDAO dao;
-	private static Scanner sc;
-
+	private SensorNetworkPublisherConnector snConnector = null;
+	private SensorMetaDAO dao;
+	private Scanner sc;
+	
+	
+	public TempInputCLI() {
+		snConnector = new SensorNetworkPublisherConnector();
+		dao = new DAOFactory().sensorMetaDAO();
+		sc = new Scanner(System.in);
+	}
 
 	public static void main(String[] args) {
-		sc = new Scanner(System.in);
-		dao = new DAOFactory().sensorMetaDAO();
+		TempInputCLI cli = new TempInputCLI();
+		cli.startCLIInterface();
+	}
 
+	private void startCLIInterface() {
 		int commandType = 0;
 		boolean continue_flag = true;
+		
+		try {
+			snConnector.createSocketandStream();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		do {
 			System.out.println("----Command Choose----");
@@ -43,41 +60,47 @@ public class TempInputCLI {
 				continue_flag = false;
 				break;
 			case 1:
-				createSensorMeta();
+				this.createSensorMeta();
 				break;
 			case 2:
-				updateSensorMeta(); 
+				this.updateSensorMeta(); 
 				break;
 			case 3:
-				deleteSensorMeta();
+				this.deleteSensorMeta();
 				break;
 			case 4:
-				createSensorTag();
+				this.createSensorTag();
 				break;
 			case 5:
-				updateSensorTag();
+				this.updateSensorTag();
 				break;
 			case 6:
-				deleteSensorTag();
+				this.deleteSensorTag();
 				break;
 			case 7:
-				createSensorNetwork();
+				this.createSensorNetwork();
 				break;
 			case 8:
-				updateSensorNetwork();
+				this.updateSensorNetwork();
 				break;
 			case 9:
-				deleteSensorNetwork();
+				this.deleteSensorNetwork();
 				break;
 			default:
 				System.out.println("Wrong Command");
 				break;
 			}
 		}while(continue_flag);
+		try {
+			snConnector.closeSocketandStream();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		System.out.println("Bye");
 	}
 
-	private static void createSensorMeta() {
+	private void createSensorMeta() {
 		String ip = null;
 		String id = null;
 		String uri = null;
@@ -102,7 +125,7 @@ public class TempInputCLI {
 		System.out.println("Finish DB Input");
 	}
 
-	private static void updateSensorMeta() {
+	private void updateSensorMeta() {
 		String ip = null;
 		String id = null;
 		String uri = null;
@@ -144,7 +167,7 @@ public class TempInputCLI {
 
 	}
 
-	private static void deleteSensorMeta() {
+	private void deleteSensorMeta() {
 		String sensor_id = null;
 		System.out.println("Delete Sensor Meta Mode");
 
@@ -162,7 +185,7 @@ public class TempInputCLI {
 		System.out.println("Finish Sensor Meta Delete");
 	}
 
-	private static void createSensorTag() {
+	private void createSensorTag() {
 		String id = null;
 		String uri = null;
 		String tag = null;
@@ -188,7 +211,7 @@ public class TempInputCLI {
 		}
 	}
 
-	private static void updateSensorTag() {
+	private void updateSensorTag() {
 		String uri = null;
 		String id = null;
 		String tag = null;
@@ -219,7 +242,7 @@ public class TempInputCLI {
 
 	}
 
-	private static void deleteSensorTag() {
+	private void deleteSensorTag() {
 		String uri = null;
 		String id = null;
 		String tag = null;
@@ -245,36 +268,39 @@ public class TempInputCLI {
 		}
 	}
 
-	private static void createSensorNetwork() {
-		String name = null;
+	private void createSensorNetwork() {
+		String sn_name = null;
 		String create_date = null;
 		int sn_id = 0;
-		String temp_sensor = null;
-		Set<String> sensors = new HashSet<String>();
+		String input_sn_id = null;
+		Set<String> sn_uris = new HashSet<String>();
 		System.out.println("Create Sensor Network Mode");
 		System.out.print("Sensor Network Name: ");
-		name = sc.nextLine();
+		sn_name = sc.nextLine();
 		
 		Calendar calendar = Calendar.getInstance();
         java.util.Date date = calendar.getTime();
         create_date = (new SimpleDateFormat("yyyyMMddHHmmss").format(date));
         
         try {
-			dao.addSensorNetwork(name, create_date);
+			dao.addSensorNetwork(sn_name, create_date);
 			System.out.println("Finish Insert Sensor Network in DB");
 			System.out.println("Add Sensors");
 			
 			for(;;){
-				System.out.print("Input Sensor: ");
-				temp_sensor = sc.nextLine();
-				if( temp_sensor.compareTo("end") == 0 )
+				System.out.print("Input Sensor(for quit to type 'x'): ");
+				input_sn_id = sc.nextLine();
+				if( input_sn_id.compareTo("x") == 0 )
 					break;
-				else
-					sensors.add(temp_sensor);
+				else {
+					String sn_uri = dao.getSensorURI(input_sn_id);
+					sn_uris.add(sn_uri);
+				}
 			}
-			
-			sn_id = dao.getSensorNetworkID(name);
-			dao.addSensorNetworkMembers(sn_id, sensors);
+			sn_id = dao.getSensorNetworkID(sn_name);
+			dao.addSensorNetworkMembers(sn_id, sn_uris);
+			snConnector.setSensorNetworkData(sn_name, sn_id, sn_uris, false);
+			snConnector.transferSensorNetworkMeta();
 			
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -284,7 +310,7 @@ public class TempInputCLI {
         
 	}
 
-	private static void updateSensorNetwork() {
+	private void updateSensorNetwork() {
 		String name = null;
 		String new_name = null;
 		
@@ -307,7 +333,7 @@ public class TempInputCLI {
         System.out.println("Finish Update Sensor Network in DB");
 	}
 	
-	private static void deleteSensorNetwork() {
+	private void deleteSensorNetwork() {
 		String name = null;
 		String delete_date = null;
 		System.out.println("Delete Sensor Network Mode");
@@ -321,6 +347,8 @@ public class TempInputCLI {
         
         try {
 			dao.deleteSensorNetwork(name, delete_date);
+			snConnector.setSensorNetworkData(name, 0, null, true);
+			snConnector.transferSensorNetworkMeta();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
