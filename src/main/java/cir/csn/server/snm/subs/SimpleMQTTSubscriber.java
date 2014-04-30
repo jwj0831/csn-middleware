@@ -15,7 +15,7 @@ import org.json.simple.JSONObject;
 
 import cir.csn.server.snm.db.DAOFactory;
 import cir.csn.server.snm.db.SensorDataDAO;
-import cir.csn.server.snm.metamangement.SensorMetaDAO;
+import cir.csn.server.snm.db.SensorMetaDAO;
 
 public class SimpleMQTTSubscriber implements MqttCallback  {
 	private MqttClient myClient;

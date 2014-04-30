@@ -10,16 +10,20 @@ import java.util.Scanner;
 import java.util.Set;
 
 import cir.csn.server.snm.db.DAOFactory;
+import cir.csn.server.snm.db.SensorMetaDAO;
+import cir.csn.server.snm.db.SensorNetworkMetaDAO;
 
 public class TempInputCLI {
 	private SensorNetworkPublisherConnector snConnector = null;
-	private SensorMetaDAO dao;
+	private SensorMetaDAO sensorMetaDAO;
+	private SensorNetworkMetaDAO sensorNetworkMetaDAO;
 	private Scanner sc;
 	
 	
 	public TempInputCLI() {
 		snConnector = new SensorNetworkPublisherConnector();
-		dao = new DAOFactory().sensorMetaDAO();
+		sensorMetaDAO = new DAOFactory().sensorMetaDAO();
+		sensorNetworkMetaDAO = new DAOFactory().sensorNetworkMetaDAO();
 		sc = new Scanner(System.in);
 	}
 
@@ -118,7 +122,7 @@ public class TempInputCLI {
 		System.out.println("Your URI: " + uri);
 
 		try {
-			dao.addSensor(uri, ip, id);
+			sensorMetaDAO.addSensorMeta(uri, ip, id);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -140,7 +144,7 @@ public class TempInputCLI {
 		id = sc.nextLine();
 
 		try {
-			sensorMetaMap = dao.getSensorMeta(id);
+			sensorMetaMap = sensorMetaDAO.getSensorMeta(id);
 
 
 			ip = sensorMetaMap.get("ip");
@@ -158,7 +162,7 @@ public class TempInputCLI {
 			uri = "http://" + ip + "/" + id;
 			System.out.println("Your New URI: " + uri);
 
-			dao.updateSensorMeta(uri, ip, id, old_id);
+			sensorMetaDAO.updateSensorMeta(uri, ip, id, old_id);
 			System.out.println("Finish DB Update");
 
 		} catch (ClassNotFoundException e) {
@@ -177,7 +181,7 @@ public class TempInputCLI {
 		sensor_id = sc.nextLine();
 
 		try {
-			dao.deleteSensorMeta(sensor_id);
+			sensorMetaDAO.deleteSensorMeta(sensor_id);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {
@@ -198,13 +202,13 @@ public class TempInputCLI {
 		id = sc.nextLine();
 
 		try {
-			sensorMetaMap = dao.getSensorMeta(id);
+			sensorMetaMap = sensorMetaDAO.getSensorMeta(id);
 			uri = sensorMetaMap.get("uri");
 
 			System.out.print("Input Tag: ");
 			tag = sc.nextLine();
 
-			dao.addTagInfo(uri, tag);
+			sensorMetaDAO.addTagInfo(uri, tag);
 
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -231,10 +235,10 @@ public class TempInputCLI {
 		new_tag = sc.nextLine();
 
 		try {
-			sensorMetaMap = dao.getSensorMeta(id);
+			sensorMetaMap = sensorMetaDAO.getSensorMeta(id);
 			uri = sensorMetaMap.get("uri");
 			
-			dao.updateTagInfo(uri, tag, new_tag);
+			sensorMetaDAO.updateTagInfo(uri, tag, new_tag);
 
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -258,10 +262,10 @@ public class TempInputCLI {
 		tag = sc.nextLine();
 
 		try {
-			sensorMetaMap = dao.getSensorMeta(id);
+			sensorMetaMap = sensorMetaDAO.getSensorMeta(id);
 			uri = sensorMetaMap.get("uri");
 			
-			dao.deleteTagInfo(uri, tag);
+			sensorMetaDAO.deleteTagInfo(uri, tag);
 
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
@@ -285,7 +289,7 @@ public class TempInputCLI {
         create_date = (new SimpleDateFormat("yyyyMMddHHmmss").format(date));
         
         try {
-			dao.addSensorNetwork(sn_name, create_date);
+			sensorNetworkMetaDAO.addSensorNetwork(sn_name, create_date);
 			System.out.println("Finish Insert Sensor Network in DB");
 			System.out.println("Add Sensors");
 			
@@ -295,12 +299,12 @@ public class TempInputCLI {
 				if( input_sn_id.compareTo("x") == 0 )
 					break;
 				else {
-					String sn_uri = dao.getSensorURI(input_sn_id);
+					String sn_uri = sensorMetaDAO.getSensorURI(input_sn_id);
 					sn_uris.add(sn_uri);
 				}
 			}
-			sn_id = dao.getSensorNetworkID(sn_name);
-			dao.addSensorNetworkMembers(sn_id, sn_uris);
+			sn_id = sensorNetworkMetaDAO.getSensorNetworkID(sn_name);
+			sensorNetworkMetaDAO.addSensorNetworkMembers(sn_id, sn_uris);
 			snConnector.setSensorNetworkData(sn_name, sn_id, sn_uris, false);
 			snConnector.transferSensorNetworkMeta();
 			
@@ -324,7 +328,7 @@ public class TempInputCLI {
 		new_name = sc.nextLine();
         
         try {
-			dao.updateSensorNetwork(name, new_name);
+        	sensorNetworkMetaDAO.updateSensorNetwork(name, new_name);
 			
 			
 		} catch (ClassNotFoundException e) {
@@ -348,7 +352,7 @@ public class TempInputCLI {
         delete_date = (new SimpleDateFormat("yyyyMMddHHmmss").format(date));
         
         try {
-			dao.deleteSensorNetwork(name, delete_date);
+        	sensorNetworkMetaDAO.deleteSensorNetwork(name, delete_date);
 			snConnector.setSensorNetworkData(name, 0, null, true);
 			snConnector.transferSensorNetworkMeta();
 		} catch (ClassNotFoundException e) {

@@ -1,5 +1,6 @@
 package cir.csn.server.snm.pub;
 
+import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,8 @@ import javax.jms.Session;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 
+import cir.csn.server.snm.db.DAOFactory;
+import cir.csn.server.snm.db.SensorNetworkMetaDAO;
 import cir.csn.server.snm.subs.SensorData;
 
 public class SensorNetworkDataPublishThread extends Thread {
@@ -21,18 +24,34 @@ public class SensorNetworkDataPublishThread extends Thread {
 	private Connection connection;
 	private Session session;
 	private Destination destination;
+	
+	private SensorNetworkMetaDAO sensorNetworkMetaDAO;
 	private Set<String> networkListSet = null;
 	private Map<String, Set<String>> networkListMap = null;
 	
 	SensorData sensorData;
-	static final int SLEEP_TIME = 100;
+	static final int SLEEP_TIME = 10;
 	
 	public void before() throws Exception {
 		connectionFactory = new ActiveMQConnectionFactory(connectionUri);
 		connection = connectionFactory.createConnection();
 		session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		sensorNetworkMetaDAO = new DAOFactory().sensorNetworkMetaDAO();
 		
+		loadNetworkMemberData();
+	}
+
+	private void loadNetworkMemberData() throws ClassNotFoundException,
+			SQLException {
+		networkListSet = sensorNetworkMetaDAO.getSensorNetworksSet();
 		
+		Iterator<String> iter = networkListSet.iterator();
+		
+		while(iter.hasNext()) {
+			String tempSensorNetworkName = iter.next();
+			Set<String> sensorMembers = sensorNetworkMetaDAO.getSensorMembersSet(tempSensorNetworkName);
+			networkListMap.put(tempSensorNetworkName, sensorMembers);
+		}
 	}
 
 	public void after() throws Exception {

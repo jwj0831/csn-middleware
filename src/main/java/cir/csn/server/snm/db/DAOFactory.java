@@ -1,6 +1,5 @@
 package cir.csn.server.snm.db;
 
-import cir.csn.server.snm.metamangement.SensorMetaDAO;
 
 public class DAOFactory {
 	public SensorDataDAO sensorDataDAO() {
@@ -9,6 +8,10 @@ public class DAOFactory {
 	
 	public SensorMetaDAO sensorMetaDAO() {
 		return new SensorMetaDAO(connectionMaker());
+	}
+	
+	public SensorNetworkMetaDAO sensorNetworkMetaDAO() {
+		return new SensorNetworkMetaDAO(connectionMaker());
 	}
 
 	private ConnectionMaker connectionMaker() {

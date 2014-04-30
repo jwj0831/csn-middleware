@@ -18,9 +18,9 @@ public class SimpleMQTTClient implements MqttCallback {
 	MqttClient myClient;
 	MqttConnectOptions connOpt;
 	static final String BROKER_URL = "tcp://localhost:1883";
-	static final String NODE_ID = "Node3";
+	static final String NODE_ID = "Node2";
 	static final String TOPIC_NAME = "CSN/Middleware/RawData";
-	static final int MSG_NUM = 5;
+	static final int MSG_NUM = 100;
 	
 	public void connectionLost(Throwable t) {
 		System.out.println("Connection lost!");
