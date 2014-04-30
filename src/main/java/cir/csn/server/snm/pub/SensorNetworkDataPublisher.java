@@ -2,10 +2,9 @@ package cir.csn.server.snm.pub;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import cir.csn.server.snm.subs.SensorData;
 
@@ -13,11 +12,11 @@ public class SensorNetworkDataPublisher {
 	private SensorNetworkMetaConnectionThread metaConnThread = null;
 	private SensorDataConnectionThread snsrDataConnThread = null;
 	private SensorNetworkDataPublishThread pubThread = null;
-	private static Queue<SensorData> sensorDataQueue = null;
+	private static ConcurrentLinkedQueue<SensorData> sensorDataQueue = null;
 	
-	public static Queue<SensorData> getSensorDataQueue() {
+	public static ConcurrentLinkedQueue<SensorData> getSensorDataQueue() {
 		if(sensorDataQueue == null) {
-			sensorDataQueue = new LinkedList<SensorData>();
+			sensorDataQueue = new ConcurrentLinkedQueue<SensorData>();
 		}
 
 		return sensorDataQueue;

@@ -30,7 +30,6 @@ public class SensorNetworkDataPublishThread extends Thread {
 	private Map<String, Set<String>> networkListMap = null;
 	
 	SensorData sensorData;
-	static final int SLEEP_TIME = 10;
 	
 	public void before() throws Exception {
 		connectionFactory = new ActiveMQConnectionFactory(connectionUri);
@@ -65,9 +64,6 @@ public class SensorNetworkDataPublishThread extends Thread {
 		while(true){
 			if( SensorNetworkDataPublisher.getSensorDataQueue().peek() != null ){
 				pubSensorDataTONewNetwork();
-			}
-			else{
-				try{Thread.sleep(SLEEP_TIME);}catch(InterruptedException ie){}
 			}
 		}
 	}
